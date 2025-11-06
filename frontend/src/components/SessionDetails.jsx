@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { requestAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { FaTimes, FaUser, FaDumbbell, FaClock, FaMapMarkerAlt, FaStar, FaInfoCircle } from 'react-icons/fa';
+import RatingModal from './RatingModal';
 
 const SessionDetails = ({ session, onClose, onRequestSent }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showRatingModal, setShowRatingModal] = useState(false);
 
   const isOwnSession = user?.profile?.id === session.user_details.id;
+  const isExpired = new Date(session.data_expirare) < new Date();
+  const canRate = !isOwnSession && isExpired;
 
   const handleSendRequest = async () => {
     setLoading(true);
@@ -28,6 +32,14 @@ const SessionDetails = ({ session, onClose, onRequestSent }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRatingSuccess = () => {
+    setShowRatingModal(false);
+    setSuccess('Rating submitted successfully! Thank you for your feedback.');
+    setTimeout(() => {
+      onClose();
+    }, 2000);
   };
 
   return (
@@ -116,7 +128,7 @@ const SessionDetails = ({ session, onClose, onRequestSent }) => {
       </div>
 
       {/* Actions */}
-      {!isOwnSession && (
+      {!isOwnSession && !isExpired && (
         <div className="border-t border-purple-200 pt-6">
           <button
             onClick={handleSendRequest}
@@ -131,12 +143,36 @@ const SessionDetails = ({ session, onClose, onRequestSent }) => {
         </div>
       )}
 
+      {canRate && (
+        <div className="border-t border-purple-200 pt-6">
+          <button
+            onClick={() => setShowRatingModal(true)}
+            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold py-4 rounded-xl hover:from-yellow-600 hover:to-orange-600 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+          >
+            ⭐ Rate Your Gym Buddy
+          </button>
+          <p className="text-xs text-gray-600 text-center mt-3 font-medium">
+            This session has ended. Share your experience!
+          </p>
+        </div>
+      )}
+
       {isOwnSession && (
         <div className="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-xl p-4 shadow-md">
           <p className="text-sm text-purple-800 text-center font-semibold">
             ✨ This is your session. Check "My Requests" to see who wants to join!
           </p>
         </div>
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <RatingModal
+          session={session}
+          buddyProfile={session.user_details}
+          onClose={() => setShowRatingModal(false)}
+          onSuccess={handleRatingSuccess}
+        />
       )}
     </div>
   );

@@ -53,7 +53,7 @@ const Profile = () => {
       <div className="card mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 bg-gradient-to-br from-primary to-purple-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+            <div className="w-24 h-24 bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg">
               {profile?.nume.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -68,9 +68,46 @@ const Profile = () => {
               </div>
             </div>
           </div>
-          <div className="text-center">
-            <p className="text-4xl font-bold text-primary">{profile?.nr_antrenamente}</p>
-            <p className="text-gray-600">Total Workouts</p>
+        </div>
+      </div>
+
+      {/* Progress Tracking Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Total Workouts */}
+        <div className="bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-200 text-sm font-medium">Total Workouts</p>
+              <p className="text-5xl font-black mt-2">{profile?.nr_antrenamente}</p>
+              <p className="text-purple-200 text-xs mt-2">Sessions completed</p>
+            </div>
+            <FaDumbbell className="text-6xl text-purple-300 opacity-50" />
+          </div>
+        </div>
+
+        {/* Average Rating */}
+        <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-yellow-100 text-sm font-medium">Average Rating</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <p className="text-5xl font-black">{profile?.rating}</p>
+                <FaStar className="text-3xl text-yellow-200" />
+              </div>
+              <p className="text-yellow-100 text-xs mt-2">Out of 5.0 stars</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Fitness Level */}
+        <div className="bg-gradient-to-br from-pink-500 to-red-600 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-all">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-pink-200 text-sm font-medium">Fitness Level</p>
+              <p className="text-3xl font-black mt-2">{profile?.grad}</p>
+              <p className="text-pink-200 text-xs mt-2">Keep pushing forward!</p>
+            </div>
+            <div className="text-5xl">💪</div>
           </div>
         </div>
       </div>
