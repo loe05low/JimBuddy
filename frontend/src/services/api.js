@@ -127,4 +127,15 @@ export const ratingAPI = {
   create: (data) => api.post('/rating', data),
 };
 
+// ==========================
+// Notifications API
+// ==========================
+
+export const notificationAPI = {
+  getAll: () => api.get('/notifications'),
+  getUnreadCount: () => api.get('/notifications/unread_count'),
+  markAsRead: (id) => api.post(`/notifications/${id}/mark_as_read`),
+  markAllAsRead: () => api.post('/notifications/mark_all_as_read'),
+};
+
 export default api;

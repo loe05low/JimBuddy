@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { FaDumbbell, FaUser, FaSignOutAlt, FaHome, FaStar } from 'react-icons/fa';
+import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -48,6 +49,8 @@ const Navbar = () => {
                     <span>{user.profile?.rating || '5.0'}</span>
                   </div>
                 </Link>
+
+                <NotificationBell />
 
                 <button
                   onClick={handleLogout}
