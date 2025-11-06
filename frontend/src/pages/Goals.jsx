@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { goalAPI } from '../services/api';
-import { FaTarget, FaPlus, FaTimes, FaCheck, FaFire, FaArrowUp } from 'react-icons/fa';
+import { FaBullseye, FaPlus, FaTimes, FaCheck, FaFire, FaArrowUp } from 'react-icons/fa';
 
 const Goals = () => {
   const [activeGoals, setActiveGoals] = useState([]);
@@ -126,7 +126,7 @@ const Goals = () => {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center space-x-3">
-            <FaTarget className="text-primary" />
+            <FaBullseye className="text-primary" />
             <span>Goals</span>
           </h1>
           <p className="text-gray-600">Set and track your fitness goals!</p>
@@ -202,7 +202,7 @@ const Goals = () => {
         <div>
           {activeGoals.length === 0 ? (
             <div className="card text-center text-gray-500 py-12">
-              <FaTarget className="text-6xl text-gray-300 mx-auto mb-4" />
+              <FaBullseye className="text-6xl text-gray-300 mx-auto mb-4" />
               <p className="text-lg">No active goals</p>
               <p className="text-sm mt-2">Click "New Goal" to create your first goal!</p>
             </div>

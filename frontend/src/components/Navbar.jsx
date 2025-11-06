@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useDarkMode } from '../context/DarkModeContext';
-import { FaDumbbell, FaUser, FaSignOutAlt, FaHome, FaStar, FaMoon, FaSun, FaTrophy, FaTarget, FaUsers, FaFire } from 'react-icons/fa';
+import { FaDumbbell, FaUser, FaSignOutAlt, FaHome, FaStar, FaMoon, FaSun, FaTrophy, FaBullseye, FaUsers, FaFire } from 'react-icons/fa';
 import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
@@ -66,7 +66,7 @@ const Navbar = () => {
                   className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white backdrop-blur-sm transition-all"
                   title="Goals"
                 >
-                  <FaTarget />
+                  <FaBullseye />
                   <span className="hidden md:inline font-semibold">Goals</span>
                 </Link>
 
