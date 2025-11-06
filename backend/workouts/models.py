@@ -24,7 +24,12 @@ class Sesiune(models.Model):
     sala = models.ForeignKey(Sala, on_delete=models.CASCADE, related_name='sesiuni')
     tip_antrenament = models.CharField(max_length=100, help_text="Ex: Cardio, Forță, CrossFit, etc.")
     interval_orar = models.CharField(max_length=100, help_text="Ex: 18:00 - 20:00")
+    data_sesiune = models.DateTimeField(blank=True, null=True, help_text="Data și ora sesiunii")
+    city = models.CharField(max_length=100, blank=True, null=True, help_text="Oraș unde are loc sesiunea")
     descriere = models.TextField(blank=True, null=True, help_text="Descriere opțională a sesiunii")
+    image = models.ImageField(upload_to='sessions/', blank=True, null=True, help_text="Poză sesiune")
+    private = models.BooleanField(default=False, help_text="Sesiune privată (doar pentru prieteni)")
+    max_participants = models.IntegerField(default=5, help_text="Număr maxim de participanți")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='activ')
 
     data_creare = models.DateTimeField(auto_now_add=True)
@@ -122,3 +127,23 @@ class Cerere(models.Model):
         self.status = 'refuzat'
         self.data_raspuns = timezone.now()
         self.save()
+
+
+class SessionParticipant(models.Model):
+    """
+    Participant la o sesiune de antrenament
+    Track-uiește cine participă la fiecare sesiune
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    sesiune = models.ForeignKey(Sesiune, on_delete=models.CASCADE, related_name='participants')
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='participated_sessions')
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Participant Sesiune"
+        verbose_name_plural = "Participanți Sesiuni"
+        unique_together = ['sesiune', 'user']
+        ordering = ['joined_at']
+
+    def __str__(self):
+        return f"{self.user.nume} la {self.sesiune.tip_antrenament}"

@@ -11,13 +11,33 @@ class SesiuneSerializer(serializers.ModelSerializer):
     """
     user_details = UserProfileSerializer(source='user', read_only=True)
     sala_details = SalaSerializer(source='sala', read_only=True)
+    image_url = serializers.SerializerMethodField()
+    participants_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Sesiune
         fields = ['id', 'user', 'user_details', 'sala', 'sala_details',
-                  'tip_antrenament', 'interval_orar', 'descriere', 'status',
-                  'data_creare', 'data_expirare']
+                  'tip_antrenament', 'interval_orar', 'data_sesiune', 'city', 'descriere',
+                  'image', 'image_url', 'private', 'max_participants', 'participants_count',
+                  'status', 'data_creare', 'data_expirare']
         read_only_fields = ['id', 'data_creare', 'status']
+
+    def get_image_url(self, obj):
+        """
+        Returnează URL-ul complet al imaginii sesiunii
+        """
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
+    def get_participants_count(self, obj):
+        """
+        Returnează numărul curent de participanți
+        """
+        return obj.participants.count()
 
     def validate(self, data):
         """
@@ -35,8 +55,22 @@ class SesiuneCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Sesiune
-        fields = ['id', 'sala', 'tip_antrenament', 'interval_orar', 'descriere', 'data_expirare']
+        fields = ['id', 'sala', 'tip_antrenament', 'interval_orar', 'data_sesiune', 'city',
+                  'descriere', 'image', 'private', 'max_participants', 'data_expirare']
         read_only_fields = ['id']
+
+
+class SessionParticipantSerializer(serializers.ModelSerializer):
+    """
+    Serializer pentru participanți la sesiuni
+    """
+    from .models import SessionParticipant
+    user_details = UserProfileSerializer(source='user', read_only=True)
+
+    class Meta:
+        model = SessionParticipant
+        fields = ['id', 'sesiune', 'user', 'user_details', 'joined_at']
+        read_only_fields = ['id', 'joined_at']
 
 
 class CerereSerializer(serializers.ModelSerializer):

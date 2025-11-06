@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "social",
     "achievements",
     "goals",
+    "chat",
 ]
 
 MIDDLEWARE = [

@@ -29,6 +29,7 @@ class Rating(models.Model):
         validators=[MinValueValidator(1.0), MaxValueValidator(5.0)],
         help_text="Rating 1-5 stele"
     )
+    feedback = models.CharField(max_length=50, blank=True, null=True, help_text="Feedback scurt (max 50 caractere)")
     comentariu = models.TextField(blank=True, null=True, help_text="Comentariu opțional despre partener")
 
     data = models.DateTimeField(auto_now_add=True)
@@ -47,15 +48,7 @@ class Rating(models.Model):
 def update_user_rating(sender, instance, created, **kwargs):
     """
     După adăugarea unui rating nou, recalculează rating-ul mediu al user-ului
-    și incrementează nr_antrenamente
     """
     if created:
         # Recalculează rating-ul mediu
         instance.to_user.update_rating()
-
-        # Incrementează numărul de antrenamente pentru ambii utilizatori
-        instance.from_user.nr_antrenamente += 1
-        instance.from_user.save(update_fields=['nr_antrenamente'])
-
-        instance.to_user.nr_antrenamente += 1
-        instance.to_user.save(update_fields=['nr_antrenamente'])

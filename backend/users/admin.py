@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, BlockedUser
 
 
 class UserProfileInline(admin.StackedInline):
@@ -34,23 +34,34 @@ class UserProfileAdmin(admin.ModelAdmin):
     """
     Admin pentru gestiunea directă a profilurilor
     """
-    list_display = ('nume', 'grad', 'rating', 'nr_antrenamente', 'user', 'created_at')
-    list_filter = ('grad', 'rating')
-    search_fields = ('nume', 'user__username', 'user__email')
-    readonly_fields = ('created_at', 'updated_at', 'nr_antrenamente', 'rating')
+    list_display = ('nume', 'city', 'grad', 'rating', 'nr_antrenamente', 'current_streak', 'user', 'created_at')
+    list_filter = ('grad', 'rating', 'city')
+    search_fields = ('nume', 'user__username', 'user__email', 'city')
+    readonly_fields = ('created_at', 'updated_at', 'nr_antrenamente', 'rating', 'current_streak', 'last_workout_date')
 
     fieldsets = (
         ('Informații Utilizator', {
-            'fields': ('user', 'nume', 'poza')
+            'fields': ('user', 'nume', 'avatar', 'bio', 'city', 'phone')
         }),
         ('Statistici', {
-            'fields': ('rating', 'nr_antrenamente', 'grad')
+            'fields': ('rating', 'nr_antrenamente', 'grad', 'current_streak', 'last_workout_date')
         }),
         ('Metadata', {
             'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(BlockedUser)
+class BlockedUserAdmin(admin.ModelAdmin):
+    """
+    Admin pentru utilizatori blocați
+    """
+    list_display = ('blocker', 'blocked', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('blocker__nume', 'blocked__nume')
+    readonly_fields = ('created_at',)
 
 
 # Re-înregistrează UserAdmin

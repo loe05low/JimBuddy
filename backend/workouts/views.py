@@ -62,7 +62,11 @@ class SesiuneViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def complete_session(self, request, pk=None):
         """
-        Marchează sesiunea ca fiind completată
+        Marchează sesiunea ca fiind completată și actualizează automat:
+        - Număr antrenamente
+        - Streak
+        - Goals progress
+        - Achievements
         POST /api/sesiuni/{id}/complete_session/
         """
         sesiune = self.get_object()
@@ -75,25 +79,78 @@ class SesiuneViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_403_FORBIDDEN)
 
         try:
-            sesiune.complete()
+            from datetime import date, timedelta
+            from achievements.utils import check_and_unlock_achievements
+            from goals.models import UserGoal
 
-            # Create activity log
+            sesiune.complete()
+            profile = request.user.profile
+
+            # 1. Update workout count
+            profile.nr_antrenamente += 1
+
+            # 2. Update streak automatically
+            today = date.today()
+            if profile.last_workout_date:
+                if profile.last_workout_date == today:
+                    # Already worked out today, don't change streak
+                    pass
+                elif profile.last_workout_date == today - timedelta(days=1):
+                    # Consecutive day
+                    profile.current_streak += 1
+                    profile.last_workout_date = today
+                else:
+                    # Streak broken
+                    profile.current_streak = 1
+                    profile.last_workout_date = today
+            else:
+                # First workout ever
+                profile.current_streak = 1
+                profile.last_workout_date = today
+
+            profile.save(update_fields=['nr_antrenamente', 'current_streak', 'last_workout_date'])
+
+            # 3. Create activity log
             from social.models import ActivityLog
             ActivityLog.objects.create(
-                user=request.user.profile,
+                user=profile,
                 activity_type='workout_completed',
-                description=f'{request.user.profile.nume} completed a {sesiune.tip_antrenament} workout at {sesiune.sala.nume}'
+                description=f'{profile.nume} completed a {sesiune.tip_antrenament} workout at {sesiune.sala.nume}'
             )
 
-            # Update user's workout count
-            profile = request.user.profile
-            profile.nr_antrenamente += 1
-            profile.save(update_fields=['nr_antrenamente'])
+            # 4. Update goals progress automatically
+            workout_goals = UserGoal.objects.filter(
+                user=profile,
+                status='active',
+                goal__goal_type='workout'
+            )
+            for user_goal in workout_goals:
+                user_goal.current_value += 1
+                if user_goal.current_value >= user_goal.target_value:
+                    user_goal.status = 'completed'
+                user_goal.save()
+
+            # Update streak goals
+            streak_goals = UserGoal.objects.filter(
+                user=profile,
+                status='active',
+                goal__goal_type='streak'
+            )
+            for user_goal in streak_goals:
+                user_goal.current_value = profile.current_streak
+                if user_goal.current_value >= user_goal.target_value:
+                    user_goal.status = 'completed'
+                user_goal.save()
+
+            # 5. Check and unlock achievements automatically
+            check_and_unlock_achievements(profile)
 
             return Response({
                 'status': 'success',
                 'message': 'Sesiune completată! 💪',
-                'session': SesiuneSerializer(sesiune).data
+                'session': SesiuneSerializer(sesiune, context={'request': request}).data,
+                'streak': profile.current_streak,
+                'total_workouts': profile.nr_antrenamente
             })
         except ValueError as e:
             return Response({

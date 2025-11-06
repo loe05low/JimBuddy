@@ -14,7 +14,7 @@ class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ['id', 'from_user', 'from_user_details', 'to_user', 'to_user_details',
-                  'sesiune', 'rating', 'comentariu', 'data']
+                  'sesiune', 'rating', 'feedback', 'comentariu', 'data']
         read_only_fields = ['id', 'from_user', 'data']
 
     def validate_rating(self, value):
@@ -41,7 +41,7 @@ class RatingCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Rating
-        fields = ['to_user', 'sesiune', 'rating', 'comentariu']
+        fields = ['to_user', 'sesiune', 'rating', 'feedback', 'comentariu']
 
     def validate_rating(self, value):
         """
@@ -49,4 +49,12 @@ class RatingCreateSerializer(serializers.ModelSerializer):
         """
         if value < 1.0 or value > 5.0:
             raise serializers.ValidationError("Rating-ul trebuie să fie între 1 și 5")
+        return value
+
+    def validate_feedback(self, value):
+        """
+        Validează că feedback-ul nu depășește 50 caractere
+        """
+        if value and len(value) > 50:
+            raise serializers.ValidationError("Feedback-ul nu poate depăși 50 de caractere")
         return value
