@@ -10,9 +10,14 @@ const api = axios.create({
   },
 });
 
-// Request interceptor pentru adăugare JWT token
+// Request interceptor pentru adăugare JWT token și trailing slash
 api.interceptors.request.use(
   (config) => {
+    // Add trailing slash if not present (Django requires it for POST/PUT/PATCH)
+    if (config.url && !config.url.endsWith('/') && !config.url.includes('?')) {
+      config.url += '/';
+    }
+
     const token = localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
