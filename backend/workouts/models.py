@@ -15,6 +15,8 @@ class Sesiune(models.Model):
         ('activ', 'Activ'),
         ('expirat', 'Expirat'),
         ('arhivat', 'Arhivat'),
+        ('completat', 'Completat'),
+        ('anulat', 'Anulat'),
     ]
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -57,6 +59,24 @@ class Sesiune(models.Model):
         if self.is_expired() and self.status == 'activ':
             self.status = 'arhivat'
             self.save(update_fields=['status'])
+
+    def complete(self):
+        """
+        Marchează sesiunea ca fiind completată
+        """
+        if self.status in ['completat', 'anulat']:
+            raise ValueError(f"Sesiunea este deja {self.status}")
+        self.status = 'completat'
+        self.save(update_fields=['status'])
+
+    def cancel(self):
+        """
+        Anulează sesiunea
+        """
+        if self.status in ['completat', 'anulat']:
+            raise ValueError(f"Sesiunea este deja {self.status}")
+        self.status = 'anulat'
+        self.save(update_fields=['status'])
 
 
 class Cerere(models.Model):

@@ -59,6 +59,76 @@ class SesiuneViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(sesiuni, many=True)
         return Response(serializer.data)
 
+    @action(detail=True, methods=['post'])
+    def complete_session(self, request, pk=None):
+        """
+        Marchează sesiunea ca fiind completată
+        POST /api/sesiuni/{id}/complete_session/
+        """
+        sesiune = self.get_object()
+
+        # Verifică că user-ul este owner-ul sesiunii
+        if sesiune.user != request.user.profile:
+            return Response({
+                'error': 'Doar owner-ul sesiunii poate completa sesiunea',
+                'code': 403
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            sesiune.complete()
+
+            # Create activity log
+            from social.models import ActivityLog
+            ActivityLog.objects.create(
+                user=request.user.profile,
+                activity_type='workout_completed',
+                description=f'{request.user.profile.nume} completed a {sesiune.tip_antrenament} workout at {sesiune.sala.nume}'
+            )
+
+            # Update user's workout count
+            profile = request.user.profile
+            profile.nr_antrenamente += 1
+            profile.save(update_fields=['nr_antrenamente'])
+
+            return Response({
+                'status': 'success',
+                'message': 'Sesiune completată! 💪',
+                'session': SesiuneSerializer(sesiune).data
+            })
+        except ValueError as e:
+            return Response({
+                'error': str(e),
+                'code': 400
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def cancel_session(self, request, pk=None):
+        """
+        Anulează sesiunea
+        POST /api/sesiuni/{id}/cancel_session/
+        """
+        sesiune = self.get_object()
+
+        # Verifică că user-ul este owner-ul sesiunii
+        if sesiune.user != request.user.profile:
+            return Response({
+                'error': 'Doar owner-ul sesiunii poate anula sesiunea',
+                'code': 403
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            sesiune.cancel()
+            return Response({
+                'status': 'success',
+                'message': 'Sesiune anulată',
+                'session': SesiuneSerializer(sesiune).data
+            })
+        except ValueError as e:
+            return Response({
+                'error': str(e),
+                'code': 400
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class CerereViewSet(viewsets.ModelViewSet):
     """

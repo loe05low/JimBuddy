@@ -104,6 +104,8 @@ export const sessionAPI = {
   create: (data) => api.post('/sesiuni', data),
   update: (id, data) => api.patch(`/sesiuni/${id}`, data),
   delete: (id) => api.delete(`/sesiuni/${id}`),
+  complete: (id) => api.post(`/sesiuni/${id}/complete_session`),
+  cancel: (id) => api.post(`/sesiuni/${id}/cancel_session`),
 };
 
 // ==========================
