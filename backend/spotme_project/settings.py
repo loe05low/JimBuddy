@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "notifications",
     "social",
     "achievements",
+    "goals",
 ]
 
 MIDDLEWARE = [

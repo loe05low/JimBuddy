@@ -168,4 +168,30 @@ export const achievementAPI = {
   getCategories: () => api.get('/achievements/categories'),
 };
 
+// ==========================
+// Goals API
+// ==========================
+
+export const goalAPI = {
+  // Goal templates
+  getAll: () => api.get('/goals'),
+  getById: (id) => api.get(`/goals/${id}`),
+
+  // User goals
+  getMyGoals: () => api.get('/user_goals'),
+  getActiveGoals: () => api.get('/user_goals/active'),
+  getCompletedGoals: () => api.get('/user_goals/completed'),
+  createGoal: (data) => api.post('/user_goals', data),
+  getGoalById: (id) => api.get(`/user_goals/${id}`),
+
+  // Goal actions
+  incrementProgress: (id, amount = 1) => api.post(`/user_goals/${id}/increment`, { amount }),
+  updateStreak: (id) => api.post(`/user_goals/${id}/update_streak`),
+  abandonGoal: (id) => api.post(`/user_goals/${id}/abandon`),
+  checkExpired: () => api.post('/user_goals/check_expired'),
+
+  // Stats
+  getStats: () => api.get('/user_goals/stats'),
+};
+
 export default api;

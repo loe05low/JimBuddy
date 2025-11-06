@@ -30,6 +30,7 @@ from ratings.views import RatingViewSet
 from notifications.views import NotificationViewSet
 from social.views import SocialViewSet
 from achievements.views import AchievementViewSet
+from goals.views import GoalViewSet, UserGoalViewSet
 
 # Router pentru API
 router = DefaultRouter()
@@ -41,6 +42,8 @@ router.register(r'rating', RatingViewSet, basename='rating')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'social', SocialViewSet, basename='social')
 router.register(r'achievements', AchievementViewSet, basename='achievement')
+router.register(r'goals', GoalViewSet, basename='goal')
+router.register(r'user_goals', UserGoalViewSet, basename='user_goal')
 
 urlpatterns = [
     # Admin
