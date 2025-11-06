@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import { gymAPI, sessionAPI } from '../services/api';
 import { FaDumbbell, FaUser, FaClock, FaInfoCircle } from 'react-icons/fa';
 import SessionForm from './SessionForm';
 import SessionDetails from './SessionDetails';
+import FilterPanel from './FilterPanel';
 
 // Custom marker icons
 const gymIcon = new Icon({
@@ -28,6 +29,12 @@ const MapView = () => {
   const [selectedSession, setSelectedSession] = useState(null);
   const [showSessionForm, setShowSessionForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    workoutType: '',
+    minRating: 0,
+    level: '',
+    timeSlot: '',
+  });
 
   // București center coordinates
   const bucharestCenter = [44.4268, 26.1025];
@@ -70,6 +77,46 @@ const MapView = () => {
     fetchData(); // Refresh sessions
   };
 
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  // Filter sessions based on current filters
+  const filteredSessions = useMemo(() => {
+    return sessions.filter((session) => {
+      // Filter by workout type
+      if (filters.workoutType && !session.tip_antrenament.toLowerCase().includes(filters.workoutType.toLowerCase())) {
+        return false;
+      }
+
+      // Filter by minimum rating
+      if (filters.minRating > 0 && parseFloat(session.user_details.rating) < filters.minRating) {
+        return false;
+      }
+
+      // Filter by fitness level
+      if (filters.level && session.user_details.grad !== filters.level) {
+        return false;
+      }
+
+      // Filter by time slot
+      if (filters.timeSlot) {
+        const timeStr = session.interval_orar.toLowerCase();
+        if (filters.timeSlot.includes('Morning') && !timeStr.match(/0[6-9]:|1[0-1]:/)) {
+          return false;
+        }
+        if (filters.timeSlot.includes('Afternoon') && !timeStr.match(/1[2-7]:/)) {
+          return false;
+        }
+        if (filters.timeSlot.includes('Evening') && !timeStr.match(/1[8-9]:|2[0-2]:/)) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [sessions, filters]);
+
   if (loading) {
     return (
       <div className="h-96 flex items-center justify-center">
@@ -83,6 +130,9 @@ const MapView = () => {
 
   return (
     <div className="relative">
+      {/* Filter Panel */}
+      <FilterPanel onFilterChange={handleFilterChange} />
+
       <div className="h-[600px] rounded-lg overflow-hidden shadow-lg">
         <MapContainer
           center={bucharestCenter}
@@ -123,7 +173,7 @@ const MapView = () => {
           ))}
 
           {/* Active Session Markers */}
-          {sessions.map((session) => (
+          {filteredSessions.map((session) => (
             <Marker
               key={session.id}
               position={[

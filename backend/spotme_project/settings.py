@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "gyms",
     "workouts",
     "ratings",
+    "notifications",
 ]
 
 MIDDLEWARE = [

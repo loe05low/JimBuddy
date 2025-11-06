@@ -27,6 +27,7 @@ from users.views import UserProfileViewSet, register_user, current_user
 from gyms.views import SalaViewSet
 from workouts.views import SesiuneViewSet, CerereViewSet
 from ratings.views import RatingViewSet
+from notifications.views import NotificationViewSet
 
 # Router pentru API
 router = DefaultRouter()
@@ -35,6 +36,7 @@ router.register(r'sali', SalaViewSet, basename='sala')
 router.register(r'sesiuni', SesiuneViewSet, basename='sesiune')
 router.register(r'cereri', CerereViewSet, basename='cerere')
 router.register(r'rating', RatingViewSet, basename='rating')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
     # Admin
