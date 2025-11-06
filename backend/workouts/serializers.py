@@ -35,7 +35,8 @@ class SesiuneCreateSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Sesiune
-        fields = ['sala', 'tip_antrenament', 'interval_orar', 'descriere', 'data_expirare']
+        fields = ['id', 'sala', 'tip_antrenament', 'interval_orar', 'descriere', 'data_expirare']
+        read_only_fields = ['id']
 
 
 class CerereSerializer(serializers.ModelSerializer):

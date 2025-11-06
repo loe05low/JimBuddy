@@ -129,3 +129,59 @@ class CerereViewSet(viewsets.ModelViewSet):
             'error': serializer.errors,
             'code': 400
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'])
+    def my_sent_requests(self, request):
+        """
+        Obține cererile trimise de user-ul curent
+        GET /api/cereri/my_sent_requests
+        """
+        cereri = Cerere.objects.filter(applicant=request.user.profile).order_by('-data_creare')
+        serializer = self.get_serializer(cereri, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def my_received_requests(self, request):
+        """
+        Obține cererile primite pentru sesiunile user-ului curent
+        GET /api/cereri/my_received_requests
+        """
+        cereri = Cerere.objects.filter(sesiune__user=request.user.profile).order_by('-data_creare')
+        serializer = self.get_serializer(cereri, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'])
+    def accept_request(self, request, pk=None):
+        """
+        Acceptă o cerere de gym buddy
+        PATCH /api/cereri/{id}/accept_request
+        """
+        cerere = self.get_object()
+
+        # Verifică că user-ul este owner-ul sesiunii
+        if cerere.sesiune.user != request.user.profile:
+            return Response({
+                'error': 'Doar owner-ul sesiunii poate accepta cereri',
+                'code': 403
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        cerere.accept()
+        return Response(CerereSerializer(cerere).data)
+
+    @action(detail=True, methods=['patch'])
+    def reject_request(self, request, pk=None):
+        """
+        Refuză o cerere de gym buddy
+        PATCH /api/cereri/{id}/reject_request
+        """
+        cerere = self.get_object()
+
+        # Verifică că user-ul este owner-ul sesiunii
+        if cerere.sesiune.user != request.user.profile:
+            return Response({
+                'error': 'Doar owner-ul sesiunii poate refuza cereri',
+                'code': 403
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        cerere.reject()
+        return Response(CerereSerializer(cerere).data)
