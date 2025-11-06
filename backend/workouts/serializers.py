@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Sesiune, Cerere
+from .models import Sesiune, Cerere, SessionParticipant
 from users.serializers import UserProfileSerializer
 from gyms.serializers import SalaSerializer
 
@@ -64,7 +64,6 @@ class SessionParticipantSerializer(serializers.ModelSerializer):
     """
     Serializer pentru participanți la sesiuni
     """
-    from .models import SessionParticipant
     user_details = UserProfileSerializer(source='user', read_only=True)
 
     class Meta:
