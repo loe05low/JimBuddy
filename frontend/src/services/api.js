@@ -156,4 +156,16 @@ export const socialAPI = {
   isFollowing: (userId) => api.get(`/social/${userId}/is_following`),
 };
 
+// ==========================
+// Achievements API
+// ==========================
+
+export const achievementAPI = {
+  getAll: () => api.get('/achievements'),
+  getById: (id) => api.get(`/achievements/${id}`),
+  getMyAchievements: () => api.get('/achievements/my_achievements'),
+  checkAchievements: () => api.post('/achievements/check_achievements'),
+  getCategories: () => api.get('/achievements/categories'),
+};
+
 export default api;

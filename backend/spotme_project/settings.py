@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "ratings",
     "notifications",
     "social",
+    "achievements",
 ]
 
 MIDDLEWARE = [
