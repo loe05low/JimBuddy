@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
+// import { Toaster } from 'react-hot-toast'; // Uncomment after: npm install react-hot-toast
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { DarkModeProvider } from './context/DarkModeContext';
 import Navbar from './components/Navbar';
@@ -14,6 +14,7 @@ function AppRoutes() {
 
   return (
     <Router>
+      {/* Uncomment after: npm install react-hot-toast
       <Toaster
         position="top-right"
         toastOptions={{
@@ -36,6 +37,7 @@ function AppRoutes() {
           },
         }}
       />
+      */}
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
         {isAuthenticated && <Navbar />}
