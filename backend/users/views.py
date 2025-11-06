@@ -7,8 +7,10 @@ from django.contrib.auth.models import User
 from .models import UserProfile
 from .serializers import (
     UserProfileSerializer,
+    UserProfileUpdateSerializer,
     UserRegistrationSerializer,
-    UserSerializer
+    UserSerializer,
+    BlockedUserSerializer
 )
 
 
@@ -107,20 +109,93 @@ class UserProfileViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Obține sau actualizează profilul utilizatorului curent
         GET /api/profiles/me - obține profil
-        PATCH /api/profiles/me - actualizează profil
+        PATCH /api/profiles/me - actualizează profil (nume, bio, city, phone, grad, avatar)
         """
         profile = request.user.profile
 
         if request.method == 'GET':
-            serializer = UserProfileSerializer(profile)
+            serializer = UserProfileSerializer(profile, context={'request': request})
             return Response(serializer.data)
 
         elif request.method == 'PATCH':
-            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            serializer = UserProfileUpdateSerializer(profile, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
+                return Response(UserProfileSerializer(profile, context={'request': request}).data)
             return Response({
                 'error': serializer.errors,
                 'code': 400
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def search(self, request):
+        """
+        Caută utilizatori după nume
+        GET /api/profiles/search?q=nume
+        """
+        query = request.query_params.get('q', '')
+        if len(query) < 2:
+            return Response({'results': []})
+
+        from .models import BlockedUser
+        blocked_ids = BlockedUser.objects.filter(blocker=request.user.profile).values_list('blocked_id', flat=True)
+
+        profiles = UserProfile.objects.filter(nume__icontains=query).exclude(
+            id__in=blocked_ids
+        ).exclude(id=request.user.profile.id)[:20]
+
+        serializer = UserProfileSerializer(profiles, many=True, context={'request': request})
+        return Response({'results': serializer.data})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def block(self, request, pk=None):
+        """
+        Blochează un utilizator
+        POST /api/profiles/{id}/block
+        """
+        from .models import BlockedUser
+
+        profile_to_block = self.get_object()
+        if profile_to_block == request.user.profile:
+            return Response({'error': 'Nu te poți bloca pe tine însuți'}, status=400)
+
+        blocked, created = BlockedUser.objects.get_or_create(
+            blocker=request.user.profile,
+            blocked=profile_to_block,
+            defaults={'reason': request.data.get('reason', '')}
+        )
+
+        if created:
+            return Response({'message': 'Utilizator blocat'}, status=201)
+        return Response({'message': 'Utilizator deja blocat'}, status=200)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def unblock(self, request, pk=None):
+        """
+        Deblochează un utilizator
+        POST /api/profiles/{id}/unblock
+        """
+        from .models import BlockedUser
+
+        profile_to_unblock = self.get_object()
+        BlockedUser.objects.filter(
+            blocker=request.user.profile,
+            blocked=profile_to_unblock
+        ).delete()
+
+        return Response({'message': 'Utilizator deblocat'}, status=200)
+
+    @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
+    def achievements(self, request, pk=None):
+        """
+        Obține achievement-urile unui utilizator
+        GET /api/profiles/{id}/achievements
+        """
+        profile = self.get_object()
+        from achievements.models import UserAchievement
+        from achievements.serializers import UserAchievementSerializer
+
+        user_achievements = UserAchievement.objects.filter(user=profile, unlocked=True).select_related('achievement')
+        serializer = UserAchievementSerializer(user_achievements, many=True)
+
+        return Response({'achievements': serializer.data})

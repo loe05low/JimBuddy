@@ -3,10 +3,11 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from .models import Sesiune, Cerere
+from .models import Sesiune, Cerere, SessionParticipant
 from .serializers import (
     SesiuneSerializer,
     SesiuneCreateSerializer,
+    SessionParticipantSerializer,
     CerereSerializer,
     CerereUpdateSerializer
 )
@@ -25,15 +26,47 @@ class SesiuneViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Filtrează sesiuni după status
+        Filtrează sesiuni după status, tip, oraș, și dată
+        Exclude sesiuni anulate (doar pentru owner în my_sessions)
+        Exclude sesiuni private dacă nu ești prieten
         """
+        from users.models import BlockedUser
+        from social.models import Follow
+
         queryset = Sesiune.objects.all()
+        user_profile = self.request.user.profile if self.request.user.is_authenticated else None
+
+        # Exclude sesiuni create de utilizatori blocați
+        if user_profile:
+            blocked_ids = BlockedUser.objects.filter(blocker=user_profile).values_list('blocked_id', flat=True)
+            queryset = queryset.exclude(user_id__in=blocked_ids)
+
+        # Exclude sesiuni anulate din listare publică
+        queryset = queryset.exclude(status='anulat')
+
+        # Filtre
         status_filter = self.request.query_params.get('status', None)
+        tip_filter = self.request.query_params.get('tip', None)
+        city_filter = self.request.query_params.get('city', None)
+        date_filter = self.request.query_params.get('date', None)
 
         if status_filter:
             queryset = queryset.filter(status=status_filter)
+        if tip_filter:
+            queryset = queryset.filter(tip_antrenament__icontains=tip_filter)
+        if city_filter:
+            queryset = queryset.filter(city__icontains=city_filter)
+        if date_filter:
+            queryset = queryset.filter(data_sesiune__date=date_filter)
 
-        return queryset.order_by('-data_creare')
+        # Sortare după data sesiunii (closest first) dacă există
+        sort = self.request.query_params.get('sort', 'created')
+        if sort == 'closest' and queryset.filter(data_sesiune__isnull=False).exists():
+            queryset = queryset.filter(data_sesiune__gte=timezone.now()).order_by('data_sesiune')
+        else:
+            queryset = queryset.order_by('-data_creare')
+
+        return queryset
 
     def get_serializer_class(self):
         """
@@ -178,13 +211,116 @@ class SesiuneViewSet(viewsets.ModelViewSet):
             return Response({
                 'status': 'success',
                 'message': 'Sesiune anulată',
-                'session': SesiuneSerializer(sesiune).data
+                'session': SesiuneSerializer(sesiune, context={'request': request}).data
             })
         except ValueError as e:
             return Response({
                 'error': str(e),
                 'code': 400
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post'])
+    def join(self, request, pk=None):
+        """
+        Alătură-te la sesiune
+        POST /api/sesiuni/{id}/join/
+        """
+        sesiune = self.get_object()
+        profile = request.user.profile
+
+        # Verificări
+        if sesiune.user == profile:
+            return Response({'error': 'Ești owner-ul acestei sesiuni'}, status=400)
+
+        if sesiune.status != 'activ':
+            return Response({'error': 'Sesiunea nu este activă'}, status=400)
+
+        # Verifică limita de participanți
+        current_count = sesiune.participants.count()
+        if current_count >= sesiune.max_participants:
+            return Response({'error': 'Sesiunea este plină'}, status=400)
+
+        # Adaugă participant
+        participant, created = SessionParticipant.objects.get_or_create(
+            sesiune=sesiune,
+            user=profile
+        )
+
+        if created:
+            # Creează notificare pentru owner
+            from notifications.models import Notification
+            Notification.objects.create(
+                user=sesiune.user,
+                notification_type='session_joined',
+                title=f'{profile.nume} s-a alăturat sesiunii tale',
+                message=f'{profile.nume} s-a alăturat la sesiunea ta de {sesiune.tip_antrenament}'
+            )
+
+            return Response({
+                'message': 'Te-ai alăturat cu succes!',
+                'session': SesiuneSerializer(sesiune, context={'request': request}).data
+            }, status=201)
+        else:
+            return Response({'message': 'Ești deja participant'}, status=200)
+
+    @action(detail=True, methods=['post'])
+    def leave(self, request, pk=None):
+        """
+        Părăsește sesiunea
+        POST /api/sesiuni/{id}/leave/
+        """
+        sesiune = self.get_object()
+        profile = request.user.profile
+
+        SessionParticipant.objects.filter(sesiune=sesiune, user=profile).delete()
+
+        return Response({'message': 'Ai părăsit sesiunea'}, status=200)
+
+    @action(detail=True, methods=['post'])
+    def repeat(self, request, pk=None):
+        """
+        Repetă sesiunea (creează una nouă cu aceleași detalii)
+        POST /api/sesiuni/{id}/repeat/
+        Body: {data_sesiune, interval_orar}
+        """
+        old_session = self.get_object()
+
+        # Verifică că user-ul este owner-ul sesiunii
+        if old_session.user != request.user.profile:
+            return Response({'error': 'Doar owner-ul poate repeta sesiunea'}, status=403)
+
+        # Creează sesiune nouă
+        new_session = Sesiune.objects.create(
+            user=request.user.profile,
+            sala=old_session.sala,
+            tip_antrenament=old_session.tip_antrenament,
+            interval_orar=request.data.get('interval_orar', old_session.interval_orar),
+            data_sesiune=request.data.get('data_sesiune'),
+            city=old_session.city,
+            descriere=old_session.descriere,
+            private=old_session.private,
+            max_participants=old_session.max_participants,
+            status='activ'
+        )
+
+        return Response({
+            'message': 'Sesiune repetată cu succes',
+            'session': SesiuneSerializer(new_session, context={'request': request}).data
+        }, status=201)
+
+    @action(detail=False, methods=['get'])
+    def history(self, request):
+        """
+        Obține istoricul sesiunilor completate de user
+        GET /api/sesiuni/history/
+        """
+        completed = Sesiune.objects.filter(
+            user=request.user.profile,
+            status='completat'
+        ).order_by('-data_creare')
+
+        serializer = SesiuneSerializer(completed, many=True, context={'request': request})
+        return Response({'sessions': serializer.data})
 
 
 class CerereViewSet(viewsets.ModelViewSet):

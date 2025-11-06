@@ -31,6 +31,7 @@ from notifications.views import NotificationViewSet
 from social.views import SocialViewSet
 from achievements.views import AchievementViewSet
 from goals.views import GoalViewSet, UserGoalViewSet
+from chat.views import ConversationViewSet, MessageViewSet
 
 # Router pentru API
 router = DefaultRouter()
@@ -44,6 +45,8 @@ router.register(r'social', SocialViewSet, basename='social')
 router.register(r'achievements', AchievementViewSet, basename='achievement')
 router.register(r'goals', GoalViewSet, basename='goal')
 router.register(r'user_goals', UserGoalViewSet, basename='user_goal')
+router.register(r'conversations', ConversationViewSet, basename='conversation')
+router.register(r'messages', MessageViewSet, basename='message')
 
 urlpatterns = [
     # Admin
