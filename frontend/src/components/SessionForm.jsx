@@ -25,13 +25,19 @@ const SessionForm = ({ gym, onClose, onSuccess }) => {
     setError('');
 
     try {
+      // Convert datetime-local to ISO format with timezone
+      const expirationDate = new Date(formData.data_expirare);
+      const isoExpiration = expirationDate.toISOString();
+
       await sessionAPI.create({
         ...formData,
+        data_expirare: isoExpiration,
         sala: gym.id,
       });
 
       onSuccess();
     } catch (err) {
+      console.error('Session creation error:', err.response?.data);
       setError(err.response?.data?.error || 'Failed to create session');
     } finally {
       setLoading(false);
