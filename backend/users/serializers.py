@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, BlockedUser
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -108,8 +108,6 @@ class BlockedUserSerializer(serializers.ModelSerializer):
     """
     Serializer pentru utilizatori blocați
     """
-    from .models import BlockedUser
-
     blocker_details = UserProfileSerializer(source='blocker', read_only=True)
     blocked_details = UserProfileSerializer(source='blocked', read_only=True)
 
