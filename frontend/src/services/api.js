@@ -138,4 +138,20 @@ export const notificationAPI = {
   markAllAsRead: () => api.post('/notifications/mark_all_as_read'),
 };
 
+// ==========================
+// Social API
+// ==========================
+
+export const socialAPI = {
+  follow: (userId) => api.post('/social/follow', { user_id: userId }),
+  unfollow: (userId) => api.post('/social/unfollow', { user_id: userId }),
+  getFollowers: () => api.get('/social/followers'),
+  getFollowing: () => api.get('/social/following'),
+  getUserFollowers: (userId) => api.get(`/social/${userId}/user_followers`),
+  getUserFollowing: (userId) => api.get(`/social/${userId}/user_following`),
+  getActivityFeed: () => api.get('/social/activity_feed'),
+  getSuggestions: () => api.get('/social/suggestions'),
+  isFollowing: (userId) => api.get(`/social/${userId}/is_following`),
+};
+
 export default api;

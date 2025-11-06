@@ -28,6 +28,7 @@ from gyms.views import SalaViewSet
 from workouts.views import SesiuneViewSet, CerereViewSet
 from ratings.views import RatingViewSet
 from notifications.views import NotificationViewSet
+from social.views import SocialViewSet
 
 # Router pentru API
 router = DefaultRouter()
@@ -37,6 +38,7 @@ router.register(r'sesiuni', SesiuneViewSet, basename='sesiune')
 router.register(r'cereri', CerereViewSet, basename='cerere')
 router.register(r'rating', RatingViewSet, basename='rating')
 router.register(r'notifications', NotificationViewSet, basename='notification')
+router.register(r'social', SocialViewSet, basename='social')
 
 urlpatterns = [
     # Admin
