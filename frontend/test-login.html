@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SpotMe Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        .log {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 SpotMe Login Test</h1>
+        <p>Direct test pentru backend-ul Django (fără React)</p>
+
+        <input type="text" id="username" placeholder="Username" value="testuser">
+        <input type="password" id="password" placeholder="Password" value="test123">
+        <button onclick="testLogin()">🚀 Test Login</button>
+
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            logDiv.innerHTML += `<div class="${className}">[${new Date().toLocaleTimeString()}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = ''; // Clear previous logs
+
+            log('🔄 Starting login test...', 'info');
+            log(`Username: ${username}`, 'info');
+            log(`Password: ${'*'.repeat(password.length)}`, 'info');
+            log('', 'info');
+
+            const url = 'http://localhost:8000/api/auth/login/';
+            log(`📡 Request URL: ${url}`, 'info');
+
+            const body = JSON.stringify({ username, password });
+            log(`📦 Request Body: ${body}`, 'info');
+            log('', 'info');
+
+            try {
+                log('⏳ Sending request...', 'info');
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: body,
+                    cache: 'no-cache' // FORCE NO CACHE
+                });
+
+                log(`📊 Status: ${response.status} ${response.statusText}`,
+                    response.ok ? 'success' : 'error');
+                log('', 'info');
+
+                log('📋 Response Headers:', 'info');
+                response.headers.forEach((value, key) => {
+                    log(`  ${key}: ${value}`, 'info');
+                });
+                log('', 'info');
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    log('✅ LOGIN SUCCESS!', 'success');
+                    log('', 'info');
+                    log('🎟️ Access Token:', 'success');
+                    log(data.access ? data.access.substring(0, 50) + '...' : 'MISSING', 'success');
+                    log('', 'info');
+                    log('🎟️ Refresh Token:', 'success');
+                    log(data.refresh ? data.refresh.substring(0, 50) + '...' : 'MISSING', 'success');
+                    log('', 'info');
+
+                    // Save to localStorage
+                    localStorage.setItem('access_token', data.access);
+                    localStorage.setItem('refresh_token', data.refresh);
+                    log('💾 Tokens saved to localStorage', 'success');
+                    log('', 'info');
+
+                    // Test getting current user
+                    log('🔄 Testing /auth/me endpoint...', 'info');
+                    const meResponse = await fetch('http://localhost:8000/api/auth/me/', {
+                        headers: {
+                            'Authorization': `Bearer ${data.access}`
+                        }
+                    });
+
+                    const userData = await meResponse.json();
+                    log(`✅ Current User: ${JSON.stringify(userData, null, 2)}`, 'success');
+
+                } else {
+                    log('❌ LOGIN FAILED!', 'error');
+                    log(`Error: ${JSON.stringify(data, null, 2)}`, 'error');
+                }
+
+            } catch (error) {
+                log('❌ NETWORK ERROR!', 'error');
+                log(`Error: ${error.message}`, 'error');
+                log(`Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Auto-run on load for quick testing
+        log('✨ Ready! Click "Test Login" or press Enter', 'info');
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') testLogin();
+        });
+    </script>
+</body>
+</html>
