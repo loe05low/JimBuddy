@@ -8,6 +8,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
+import Achievements from './pages/Achievements';
+import Goals from './pages/Goals';
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -67,6 +69,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/achievements"
+            element={
+              <ProtectedRoute>
+                <Achievements />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              <ProtectedRoute>
+                <Goals />
               </ProtectedRoute>
             }
           />

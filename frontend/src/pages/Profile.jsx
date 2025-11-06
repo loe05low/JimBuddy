@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { profileAPI, sessionAPI } from '../services/api';
-import { FaUser, FaStar, FaDumbbell, FaClock, FaMapMarkerAlt, FaComment } from 'react-icons/fa';
+import { FaUser, FaStar, FaDumbbell, FaClock, FaMapMarkerAlt, FaComment, FaCheck, FaTimes } from 'react-icons/fa';
 import RequestManager from '../components/RequestManager';
 
 const Profile = () => {
@@ -33,6 +33,38 @@ const Profile = () => {
       console.error('Error fetching profile:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCompleteSession = async (sessionId) => {
+    if (!confirm('Mark this session as completed? This will update your workout count.')) {
+      return;
+    }
+
+    try {
+      await sessionAPI.complete(sessionId);
+      // Refresh data
+      fetchProfileData();
+      alert('Session completed! 💪');
+    } catch (err) {
+      console.error('Error completing session:', err);
+      alert('Failed to complete session. Please try again.');
+    }
+  };
+
+  const handleCancelSession = async (sessionId) => {
+    if (!confirm('Are you sure you want to cancel this session?')) {
+      return;
+    }
+
+    try {
+      await sessionAPI.cancel(sessionId);
+      // Refresh data
+      fetchProfileData();
+      alert('Session cancelled.');
+    } catch (err) {
+      console.error('Error cancelling session:', err);
+      alert('Failed to cancel session. Please try again.');
     }
   };
 
@@ -167,6 +199,8 @@ const Profile = () => {
                         <FaDumbbell className="text-primary" />
                         <h3 className="font-bold text-lg">{session.tip_antrenament}</h3>
                         {session.status === 'activ' && <span className="badge-success text-xs">Active</span>}
+                        {session.status === 'completat' && <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-semibold">✓ Completed</span>}
+                        {session.status === 'anulat' && <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs font-semibold">Cancelled</span>}
                         {session.status === 'arhivat' && <span className="badge-danger text-xs">Archived</span>}
                       </div>
                       <div className="space-y-1 text-sm text-gray-600 ml-6">
@@ -183,6 +217,28 @@ const Profile = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Action Buttons for Active Sessions */}
+                    {session.status === 'activ' && (
+                      <div className="flex space-x-2 ml-4">
+                        <button
+                          onClick={() => handleCompleteSession(session.id)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition"
+                          title="Mark as completed"
+                        >
+                          <FaCheck />
+                          <span>Complete</span>
+                        </button>
+                        <button
+                          onClick={() => handleCancelSession(session.id)}
+                          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition"
+                          title="Cancel session"
+                        >
+                          <FaTimes />
+                          <span>Cancel</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
