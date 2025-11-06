@@ -123,7 +123,7 @@ const Friends = () => {
               <p className="text-pink-100 text-sm font-medium">Suggestions</p>
               <p className="text-4xl font-black mt-2">{suggestions.length}</p>
             </div>
-            <div className="text-5xl">=¡</div>
+            <div className="text-5xl">=ï¿½</div>
           </div>
         </div>
       </div>
@@ -217,13 +217,13 @@ const Friends = () => {
         <div>
           <div className="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-800 dark:text-blue-200">
-              =¡ <strong>Friend Suggestions:</strong> Based on your fitness level and interests
+              ðŸ’¡ <strong>Friend Suggestions:</strong> Based on your fitness level and interests
             </p>
           </div>
 
           {suggestions.length === 0 ? (
             <div className="card text-center text-gray-500 py-12">
-              <div className="text-6xl mx-auto mb-4"><¯</div>
+              <div className="text-6xl mx-auto mb-4">ðŸŽ¯</div>
               <p className="text-lg">No suggestions available</p>
               <p className="text-sm mt-2">We'll find the perfect gym buddies for you soon!</p>
             </div>
