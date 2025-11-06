@@ -24,6 +24,21 @@ const Achievements = () => {
     }
   };
 
+  const handleCheckAchievements = async () => {
+    try {
+      const response = await achievementAPI.checkAchievements();
+      if (response.data.achievements && response.data.achievements.length > 0) {
+        alert(`ðŸŽ‰ ${response.data.message}`);
+        fetchAchievements(); // Refresh to show new unlocks
+      } else {
+        alert('No new achievements unlocked. Keep working out! ðŸ’ª');
+      }
+    } catch (err) {
+      console.error('Error checking achievements:', err);
+      alert('Failed to check achievements.');
+    }
+  };
+
   const getRarityColor = (rarity) => {
     switch (rarity) {
       case 'common':
@@ -59,12 +74,21 @@ const Achievements = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-800 mb-2 flex items-center space-x-3">
-          <FaTrophy className="text-yellow-500" />
-          <span>Achievements</span>
-        </h1>
-        <p className="text-gray-600">Track your progress and unlock rewards!</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-2 flex items-center space-x-3">
+            <FaTrophy className="text-yellow-500" />
+            <span>Achievements</span>
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">Track your progress and unlock rewards!</p>
+        </div>
+        <button
+          onClick={handleCheckAchievements}
+          className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-lg flex items-center space-x-2 font-semibold transition shadow-lg"
+        >
+          <FaTrophy />
+          <span>Check Progress</span>
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -96,7 +120,7 @@ const Achievements = () => {
               <p className="text-blue-100 text-sm font-medium">In Progress</p>
               <p className="text-4xl font-black mt-2">{stats.in_progress}</p>
             </div>
-            <div className="text-5xl">ó</div>
+            <div className="text-5xl">ï¿½</div>
           </div>
         </div>
 
@@ -108,7 +132,7 @@ const Achievements = () => {
                 {stats.total > 0 ? Math.round((stats.unlocked / stats.total) * 100) : 0}%
               </p>
             </div>
-            <div className="text-5xl">=Ê</div>
+            <div className="text-5xl">=ï¿½</div>
           </div>
         </div>
       </div>

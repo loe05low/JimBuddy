@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { goalAPI } from '../services/api';
-import { FaTarget, FaPlus, FaTimes, FaCheck, FaFire } from 'react-icons/fa';
+import { FaTarget, FaPlus, FaTimes, FaCheck, FaFire, FaArrowUp } from 'react-icons/fa';
 
 const Goals = () => {
   const [activeGoals, setActiveGoals] = useState([]);
@@ -56,7 +56,7 @@ const Goals = () => {
       setShowCreateModal(false);
       fetchGoals();
       fetchStats();
-      alert('Goal created successfully! <�');
+      alert('Goal created successfully! <�');
     } catch (err) {
       console.error('Error creating goal:', err);
       alert(err.response?.data?.error || 'Failed to create goal. You may already have an active goal of this type.');
@@ -76,6 +76,36 @@ const Goals = () => {
     } catch (err) {
       console.error('Error abandoning goal:', err);
       alert('Failed to abandon goal.');
+    }
+  };
+
+  const handleIncrementProgress = async (goalId) => {
+    try {
+      const response = await goalAPI.incrementProgress(goalId, 1);
+      if (response.data.completed) {
+        alert('🎉 Goal completed! Congratulations!');
+      }
+      fetchGoals();
+      fetchStats();
+    } catch (err) {
+      console.error('Error incrementing progress:', err);
+      alert('Failed to update progress.');
+    }
+  };
+
+  const handleUpdateStreak = async (goalId) => {
+    try {
+      const response = await goalAPI.updateStreak(goalId);
+      if (response.data.completed) {
+        alert('🎉 Goal completed! You maintained the streak!');
+      } else {
+        alert(`Streak updated! Current streak: ${response.data.current_streak} days 🔥`);
+      }
+      fetchGoals();
+      fetchStats();
+    } catch (err) {
+      console.error('Error updating streak:', err);
+      alert('Failed to update streak.');
     }
   };
 
@@ -213,14 +243,39 @@ const Goals = () => {
                       </div>
                     </div>
 
-                    {/* Abandon Button */}
-                    <button
-                      onClick={() => handleAbandonGoal(goal.id)}
-                      className="ml-4 bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition"
-                      title="Abandon goal"
-                    >
-                      <FaTimes />
-                    </button>
+                    {/* Action Buttons */}
+                    <div className="ml-4 flex flex-col space-y-2">
+                      {/* Increment Progress Button */}
+                      <button
+                        onClick={() => handleIncrementProgress(goal.id)}
+                        className="bg-primary hover:bg-blue-700 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm font-semibold"
+                        title="Increment progress"
+                      >
+                        <FaArrowUp />
+                        <span>+1</span>
+                      </button>
+
+                      {/* Update Streak Button (only for streak goals) */}
+                      {goal.goal_name && goal.goal_name.toLowerCase().includes('streak') && (
+                        <button
+                          onClick={() => handleUpdateStreak(goal.id)}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded-lg flex items-center space-x-2 transition text-sm font-semibold"
+                          title="Update streak"
+                        >
+                          <FaFire />
+                          <span>Streak</span>
+                        </button>
+                      )}
+
+                      {/* Abandon Button */}
+                      <button
+                        onClick={() => handleAbandonGoal(goal.id)}
+                        className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg transition"
+                        title="Abandon goal"
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

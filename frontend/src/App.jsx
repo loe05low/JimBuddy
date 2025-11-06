@@ -10,6 +10,8 @@ import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Achievements from './pages/Achievements';
 import Goals from './pages/Goals';
+import Friends from './pages/Friends';
+import ActivityFeed from './pages/ActivityFeed';
 
 function AppRoutes() {
   const { isAuthenticated } = useAuth();
@@ -85,6 +87,22 @@ function AppRoutes() {
             element={
               <ProtectedRoute>
                 <Goals />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/friends"
+            element={
+              <ProtectedRoute>
+                <Friends />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activity"
+            element={
+              <ProtectedRoute>
+                <ActivityFeed />
               </ProtectedRoute>
             }
           />
