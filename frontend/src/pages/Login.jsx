@@ -39,15 +39,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 px-4">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 transform hover:scale-[1.02] transition-transform">
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <FaDumbbell className="text-6xl text-primary" />
+            <div className="bg-gradient-to-br from-purple-600 to-pink-600 p-4 rounded-2xl shadow-lg">
+              <FaDumbbell className="text-5xl text-white" />
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">SpotMe</h1>
-          <p className="text-gray-600 mt-2">Find your perfect gym buddy</p>
+          <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">SpotMe</h1>
+          <p className="text-gray-600 mt-2 font-medium">Find your perfect gym buddy</p>
         </div>
 
         {/* Error Message */}

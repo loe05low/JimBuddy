@@ -31,11 +31,11 @@ const SessionDetails = ({ session, onClose, onRequestSent }) => {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Session Details</h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Session Details</h2>
+        <button onClick={onClose} className="text-gray-500 hover:text-red-600 hover:scale-110 transition-all p-2 rounded-full hover:bg-red-50">
           <FaTimes className="text-2xl" />
         </button>
       </div>
@@ -117,24 +117,24 @@ const SessionDetails = ({ session, onClose, onRequestSent }) => {
 
       {/* Actions */}
       {!isOwnSession && (
-        <div className="border-t pt-4">
+        <div className="border-t border-purple-200 pt-6">
           <button
             onClick={handleSendRequest}
             disabled={loading}
-            className="w-full btn-secondary disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-xl hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
           >
-            {loading ? 'Sending Request...' : 'Send Buddy Request'}
+            {loading ? 'Sending Request...' : '🤝 Send Buddy Request'}
           </button>
-          <p className="text-xs text-gray-500 text-center mt-2">
+          <p className="text-xs text-gray-600 text-center mt-3 font-medium">
             The session owner will review your profile before accepting
           </p>
         </div>
       )}
 
       {isOwnSession && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800 text-center">
-            This is your session. Check "My Requests" to see who wants to join!
+        <div className="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-300 rounded-xl p-4 shadow-md">
+          <p className="text-sm text-purple-800 text-center font-semibold">
+            ✨ This is your session. Check "My Requests" to see who wants to join!
           </p>
         </div>
       )}

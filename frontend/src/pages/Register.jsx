@@ -59,14 +59,14 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4 py-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 px-4 py-8">
+      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8">
         {/* Logo */}
         <div className="text-center mb-6">
           <div className="flex justify-center mb-3">
             <FaDumbbell className="text-5xl text-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">Join SpotMe</h1>
+          <h1 className="text-4xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">Join SpotMe</h1>
           <p className="text-gray-600 mt-2">Create your gym buddy account</p>
         </div>
 
