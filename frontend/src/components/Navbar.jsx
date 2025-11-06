@@ -1,10 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaDumbbell, FaUser, FaSignOutAlt, FaHome, FaStar } from 'react-icons/fa';
+import { useDarkMode } from '../context/DarkModeContext';
+import { FaDumbbell, FaUser, FaSignOutAlt, FaHome, FaStar, FaMoon, FaSun } from 'react-icons/fa';
 import NotificationBell from './NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { darkMode, toggleDarkMode } = useDarkMode();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -51,6 +53,14 @@ const Navbar = () => {
                 </Link>
 
                 <NotificationBell />
+
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition-all"
+                  aria-label="Toggle dark mode"
+                >
+                  {darkMode ? <FaSun className="text-xl" /> : <FaMoon className="text-xl" />}
+                </button>
 
                 <button
                   onClick={handleLogout}
